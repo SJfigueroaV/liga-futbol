@@ -1,0 +1,8 @@
+liga=Liga Ejemplo
+puntos_victoria=3
+puntos_empate=1
+puntos_derrota=0
+equipo=Real Madrid
+equipo=Barcelona
+equipo=Atletico de Madrid
+equipo=Sevilla FC
