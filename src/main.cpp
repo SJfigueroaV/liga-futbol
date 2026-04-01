@@ -68,7 +68,22 @@ ConfigLiga leerConfig(string ruta){
         exit(1);
     }
 }
-void guardarPartido(Game g){
+
+bool partidoDuplicado(Game nuevo, vector<Game> partidos) {
+    for (int i = 0; i < partidos.size(); i++) {
+        if (partidos[i].local == nuevo.local && 
+            partidos[i].visiting == nuevo.visiting) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void guardarPartido(Game g, vector<Game> partidos ){
+  if (partidoDuplicado(g, partidos)){
+  cout << "Error: ese partido ya fue registrado" << endl;
+  return;
+  }
   ofstream archivo("data/partidos.txt", ios::app);
   if (archivo.is_open()){
     archivo << g.date << "|";
@@ -120,10 +135,10 @@ int main() {
     g.visiting = "Barcelona";
     g.lgoals = 2;
     g.vgoals = 1;
-    guardarPartido(g);
+    vector<Game> partidos = leerPartidos();
+    guardarPartido(g, partidos);
 
     // Prueba leer partidos
-    vector<Game> partidos = leerPartidos();
     cout << "Partidos guardados: " << partidos.size() << endl;
 
     return 0;
