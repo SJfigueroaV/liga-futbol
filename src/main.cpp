@@ -104,6 +104,7 @@ vector<Game> leerPartidos() {
     if (!archivo.is_open()) return partidos; // si no existe, retorna vacío
     string linea;
     while (getline(archivo, linea)) {
+    if (linea.empty()) continue;
     stringstream ss(linea);
     string date, local, visiting, lgoals, vgoals;
     getline(ss, date, '|');
@@ -123,22 +124,48 @@ vector<Game> leerPartidos() {
     archivo.close();
     return partidos;
 }
+// Actualiza las estadísticas de un equipo según el resultado de un partido
+void actualizarEstadisticas(Team* t, int golesAFavor, int golesEnContra, ConfigLiga config){
+  t->tgames++;
+  t->sgoals += golesAFavor;
+  t->agoals += golesEnContra;
+  t->dgoals += golesAFavor - golesEnContra;
+  if ( golesAFavor > golesEnContra ) {
+    t->wgames++;
+    t->points += config.wpoints;
+  } else if ( golesAFavor == golesEnContra ) {
+    t->dgames++;
+    t->points += config.dpoints;
+  } else {
+    t->lgames++;
+    t->points += config.lpoints;
+  }
+
+}  
 
 int main() {
     ConfigLiga config = leerConfig("data/config.txt");
     cout << "Liga: " << config.name << endl;
 
-    // Prueba guardar un partido
-    Game g;
-    g.date = "2024-01-15";
-    g.local = "Real Madrid";
-    g.visiting = "Barcelona";
-    g.lgoals = 2;
-    g.vgoals = 1;
-    vector<Game> partidos = leerPartidos();
-    guardarPartido(g, partidos);
+    Team equipo;
+    equipo.name = "Real Madrid";
+    equipo.tgames = 0;
+    equipo.wgames = 0;
+    equipo.dgames = 0;
+    equipo.lgames = 0;
+    equipo.sgoals = 0;
+    equipo.agoals = 0;
+    equipo.dgoals = 0;
+    equipo.points = 0;
+
+    actualizarEstadisticas(&equipo, 2, 1, config);
+
+    cout << equipo.name << " - PJ:" << equipo.tgames
+     << " PTS:" << equipo.points
+     << " GF:" << equipo.sgoals << endl;
 
     // Prueba leer partidos
+    vector<Game> partidos = leerPartidos();
     cout << "Partidos guardados: " << partidos.size() << endl;
 
     return 0;
