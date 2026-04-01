@@ -68,10 +68,63 @@ ConfigLiga leerConfig(string ruta){
         exit(1);
     }
 }
+void guardarPartido(Game g){
+  ofstream archivo("data/partidos.txt", ios::app);
+  if (archivo.is_open()){
+    archivo << g.date << "|";
+    archivo << g.local << "|";
+    archivo << g.visiting << "|";
+    archivo << g.lgoals << "|" ;
+    archivo << g.vgoals << "\n";
+    archivo.close();
+  } else {
+    cout << "No se pudo guardar el archivo";
+    exit(1);
+  }
+}
+
+vector<Game> leerPartidos() {
+    vector<Game> partidos;
+    ifstream archivo("data/partidos.txt");
+    if (!archivo.is_open()) return partidos; // si no existe, retorna vacío
+    string linea;
+    while (getline(archivo, linea)) {
+    stringstream ss(linea);
+    string date, local, visiting, lgoals, vgoals;
+    getline(ss, date, '|');
+    getline(ss, local, '|');
+    getline(ss, visiting, '|');
+    getline(ss, lgoals, '|');
+    getline(ss, vgoals);
+    Game g;
+    g.date = date;
+    g.local = local;
+    g.visiting = visiting;
+    g.lgoals = stoi(lgoals);
+    g.vgoals = stoi(vgoals);
+    partidos.push_back(g);
+    
+    }
+    archivo.close();
+    return partidos;
+}
 
 int main() {
     ConfigLiga config = leerConfig("data/config.txt");
     cout << "Liga: " << config.name << endl;
-    cout << "Equipos: " << config.teams.size() << endl;
+
+    // Prueba guardar un partido
+    Game g;
+    g.date = "2024-01-15";
+    g.local = "Real Madrid";
+    g.visiting = "Barcelona";
+    g.lgoals = 2;
+    g.vgoals = 1;
+    guardarPartido(g);
+
+    // Prueba leer partidos
+    vector<Game> partidos = leerPartidos();
+    cout << "Partidos guardados: " << partidos.size() << endl;
+
     return 0;
 }
