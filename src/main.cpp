@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 // Almacena la configuracion leida desde config.txt
@@ -141,32 +142,55 @@ void actualizarEstadisticas(Team* t, int golesAFavor, int golesEnContra, ConfigL
     t->points += config.lpoints;
   }
 
-}  
+}
+
+vector<Team> construirTabla(vector<Game> partidos, ConfigLiga config) {
+  vector<Team> equipos;
+  for (int i = 0; i < config.teams.size(); i++) {
+    Team t;
+    t.name = config.teams[i];
+    t.tgames = 0;
+    t.wgames = 0;
+    t.dgames = 0;
+    t.lgames = 0;
+    t.sgoals = 0;
+    t.agoals = 0;
+    t.dgoals = 0;
+    t.points = 0;
+    equipos.push_back(t);
+  }
+  for (int i = 0; i < partidos.size(); i++){
+    //buscar equipo local en equipos
+    for (int j = 0; j < equipos.size(); j++){
+      if (equipos[j].name == partidos[i].local){
+        actualizarEstadisticas(&equipos[j], partidos[i].lgoals, partidos[i].vgoals, config);
+      }
+    //buscar equipo visitante en equipos
+      if (equipos[j].name == partidos[i].visiting) {
+        actualizarEstadisticas(&equipos[j], partidos[i].vgoals, partidos[i].lgoals, config);
+        }
+    }
+  }
+  return equipos;
+}
+bool compararEquipos(Team a, Team b){
+  return a.points > b.points;
+}
+void ordenarTabla(vector<Team>& equipos) {
+  sort(equipos.begin(), equipos.end(), compararEquipos);
+}
+
 
 int main() {
     ConfigLiga config = leerConfig("data/config.txt");
-    cout << "Liga: " << config.name << endl;
-
-    Team equipo;
-    equipo.name = "Real Madrid";
-    equipo.tgames = 0;
-    equipo.wgames = 0;
-    equipo.dgames = 0;
-    equipo.lgames = 0;
-    equipo.sgoals = 0;
-    equipo.agoals = 0;
-    equipo.dgoals = 0;
-    equipo.points = 0;
-
-    actualizarEstadisticas(&equipo, 2, 1, config);
-
-    cout << equipo.name << " - PJ:" << equipo.tgames
-     << " PTS:" << equipo.points
-     << " GF:" << equipo.sgoals << endl;
-
-    // Prueba leer partidos
     vector<Game> partidos = leerPartidos();
-    cout << "Partidos guardados: " << partidos.size() << endl;
+    vector<Team> tabla = construirTabla(partidos, config);
+    ordenarTabla(tabla);
 
+    for (int i = 0; i < tabla.size(); i++) {
+        cout << tabla[i].name << " - PTS:" << tabla[i].points
+             << " PJ:" << tabla[i].tgames
+             << " GF:" << tabla[i].sgoals << endl;
+    }
     return 0;
 }
