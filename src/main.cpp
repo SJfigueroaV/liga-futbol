@@ -74,7 +74,9 @@ ConfigLiga leerConfig(string ruta){
 bool partidoDuplicado(Game nuevo, vector<Game> partidos) {
     for (int i = 0; i < partidos.size(); i++) {
         if (partidos[i].local == nuevo.local && 
-            partidos[i].visiting == nuevo.visiting) {
+            partidos[i].visiting == nuevo.visiting &&
+            partidos[i].date == nuevo.date
+            ) {
             return true;
         }
     }
@@ -319,22 +321,96 @@ void historialEnfrentamientos(string equipo1, string equipo2, vector<Game> parti
     }
     if (!encontrado) cout << "No hay enfrentamientos registrados." << endl;
 }
+// Muestra el menú y retorna la opción elegida
+int menu(string nombreLiga) {
+    int opcion;
+    cout << "\n=== " << nombreLiga << " ===" << endl;
+    cout << "1. Ver tabla de posiciones" << endl;
+    cout << "2. Registrar resultado de un partido" << endl;
+    cout << "3. Ver historial de jornadas" << endl;
+    cout << "4. Ver todos los partidos jugados" << endl;
+    cout << "5. Salir" << endl;
+    cout << "Elige una opcion: ";
+    cin >> opcion;
+    return opcion;
+}
 
+// Guía al usuario para ingresar un nuevo partido con validación
+void ingresarPartido(ConfigLiga config, vector<Game>& partidos) {
+    for (int i = 0; i < config.teams.size(); i++){
+      cout << i+1 << " " << config.teams[i] << endl;
+    }
+    int nl = 0;
+    int nv = 0;
+    do {
+      cout << "Numero de equipo local: ";
+      cin >> nl;
+      cout << "Numero de equipo visitante: ";
+      cin >> nv;
+      if (nl < 1 || nl > config.teams.size() || 
+      nv < 1 || nv > config.teams.size()) {
+      cout << "Número de equipo inválido." << endl;
+      nl = nv = 0;
+      continue;
+      }
+      if ( nl == nv ) {
+        cout << "Equipos iguales intente de nuevo" << endl;
+      }
+    }
+    while ( nl == nv || nl == 0 );
+    int gl = 0;
+    int gv = 0;
+    
+    string date;
+    cout << "Goles del " << config.teams[nl-1] << ": ";
+    cin >> gl;
+    cout << "Goles del " << config.teams[nv-1] << ": " ;
+    cin >> gv;
+    cout << "Fecha: ";
+    cin >> date;
+    Game g;
+    g.date = date;
+    g.local = config.teams[nl-1];
+    g.visiting = config.teams[nv-1];
+    g.lgoals = gl;
+    g.vgoals = gv;
+    guardarPartido(g, partidos);
+    partidos.push_back(g);
 
-int main() {
+}
+
+void run(){
     ConfigLiga config = leerConfig("data/config.txt");
     vector<Game> partidos = leerPartidos();
-    vector<Team> tabla = construirTabla(partidos, config);
-    ordenarTabla(tabla);
-    mostrarTabla(tabla);
-    exportarTabla(tabla);
-    
-    // prueba jornadas
-    guardarJornada(1, partidos);
-    mostrarJornadas();
+    int opcion;
+    do {
+        opcion = menu(config.name);
+        if (opcion == 1) {
+            vector<Team> tabla = construirTabla(partidos, config);
+            ordenarTabla(tabla);
+            mostrarTabla(tabla);
+        } else if (opcion == 2) {
+            ingresarPartido(config, partidos);
+        } else if (opcion == 3) {
+            mostrarJornadas();
+        } else if (opcion == 4) {
+            vector<Game> todosLosPartidos = leerPartidos();
+            for (int i = 0; i < todosLosPartidos.size(); i++) {
+            cout << todosLosPartidos[i].date << " | "
+                 << todosLosPartidos[i].local << " "
+                 << todosLosPartidos[i].lgoals << " - "
+                 << todosLosPartidos[i].vgoals << " "
+                 << todosLosPartidos[i].visiting << endl;
+    }
+        } else if (opcion == 5) {
+            cout << "Exit" << endl;
+        } else {
+            cout << "Opción inválida." << endl;
+        }
+    } while (opcion != 5);
+}
 
-    //prueba historial
-    historialEnfrentamientos("Real Madrid", "Barcelona", partidos);
-    
+int main() {
+    run();
     return 0;
 }
