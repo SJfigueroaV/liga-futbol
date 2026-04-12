@@ -254,6 +254,73 @@ void exportarTabla(vector<Team> tabla) {
     archivo.close();
 }
 
+// Guarda los partidos de una jornada en fechas.txt en modo append
+void guardarJornada(int numero, vector<Game> partidos) {
+    ofstream archivo("data/fechas.txt", ios::app);
+    if (!archivo.is_open()) {
+        cout << "Error: no se pudo abrir fechas.txt" << endl;
+        return;
+    }
+    archivo << "JORNADA=" << numero << "\n";
+    for (int i = 0; i < partidos.size(); i++) {
+      archivo << partidos[i].date << "|";
+      archivo << partidos[i].local << "|";
+      archivo << partidos[i].visiting << "|";
+      archivo << partidos[i].lgoals << "|" ;
+      archivo << partidos[i].vgoals << "\n";
+    }
+    archivo << "FIN_JORNADA\n";
+    archivo.close();
+}
+
+// Lee fechas.txt y muestra todas las jornadas con sus partidos
+void mostrarJornadas() {
+    ifstream archivo("data/fechas.txt");
+    if (!archivo.is_open()) {
+        cout << "No hay jornadas registradas." << endl;
+        return;
+    }
+    string linea;
+    while (getline(archivo, linea)) {
+        // si la línea empieza con "JORNADA=" → imprimir encabezado
+        if ( linea.substr(0, 8) == "JORNADA="){
+          cout << "--" << " Jornada " << linea.substr(8) << " --" << endl;
+        } else if (linea == "FIN_JORNADA") {
+          cout << endl;
+        } else {
+          if (linea.empty()) continue;
+          stringstream ss(linea);
+          string date, local, visiting, lgoals, vgoals;
+          getline(ss, date, '|');
+          getline(ss, local, '|');
+          getline(ss, visiting, '|');
+          getline(ss, lgoals, '|');
+          getline(ss, vgoals);
+          cout << local << " " << lgoals << " - " << vgoals << " " << visiting << endl;
+
+        }
+    }
+    archivo.close();
+}
+
+// Muestra todos los partidos entre dos equipos seleccionados
+void historialEnfrentamientos(string equipo1, string equipo2, vector<Game> partidos) {
+    cout << "-- Enfrentamientos: " << equipo1 << " vs " << equipo2 << " --" << endl;
+    bool encontrado = false;
+    for (int i = 0; i < partidos.size(); i++) {
+      if ((partidos[i].local == equipo1 && partidos[i].visiting == equipo2) ||
+          (partidos[i].local == equipo2 && partidos[i].visiting == equipo1)) {
+              cout << partidos[i].date << " | " << partidos[i].local 
+                   << " " << partidos[i].lgoals << " - " 
+                   << partidos[i].vgoals << " " << partidos[i].visiting << endl;
+       encontrado = true;
+      }
+
+    }
+    if (!encontrado) cout << "No hay enfrentamientos registrados." << endl;
+}
+
+
 int main() {
     ConfigLiga config = leerConfig("data/config.txt");
     vector<Game> partidos = leerPartidos();
@@ -261,5 +328,13 @@ int main() {
     ordenarTabla(tabla);
     mostrarTabla(tabla);
     exportarTabla(tabla);
+    
+    // prueba jornadas
+    guardarJornada(1, partidos);
+    mostrarJornadas();
+
+    //prueba historial
+    historialEnfrentamientos("Real Madrid", "Barcelona", partidos);
+    
     return 0;
 }
