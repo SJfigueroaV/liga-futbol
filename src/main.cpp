@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
 
 // Almacena la configuracion leida desde config.txt
@@ -174,23 +175,91 @@ vector<Team> construirTabla(vector<Game> partidos, ConfigLiga config) {
   return equipos;
 }
 bool compararEquipos(Team a, Team b){
-  return a.points > b.points;
+  if ( a.points != b.points ){
+    return a.points > b.points;
+  } else if( a.dgoals != b.dgoals ){
+    return a.dgoals > b.dgoals;
+  } else {
+    return a.sgoals > b.sgoals;
+  }
 }
 void ordenarTabla(vector<Team>& equipos) {
   sort(equipos.begin(), equipos.end(), compararEquipos);
 }
 
+// Muestra la tabla de posiciones en consola con formato de columnas
+void mostrarTabla(vector<Team> tabla) {
+    // imprimir encabezado
+    cout << left << setw(4) << "#"
+         << setw(22) << "Equipo"
+         << right << setw(4) << "PJ"
+         << setw(4) << "PG"
+         << setw(4) << "PE"
+         << setw(4) << "PP"
+         << setw(4) << "GF"
+         << setw(4) << "GC"
+         << setw(4) << "DG"
+         << setw(5) << "PTS" << endl;
+
+    // imprimir cada equipo
+    for (int i = 0; i < tabla.size(); i++) {
+
+      cout << left << setw(4) << i+1
+           << setw(22) << tabla[i].name
+           << right << setw(4) << tabla[i].tgames
+           << setw(4) << tabla[i].wgames
+           << setw(4) << tabla[i].dgames
+           << setw(4) << tabla[i].lgames
+           << setw(4) << tabla[i].sgoals
+           << setw(4) << tabla[i].agoals
+           << setw(4) << tabla[i].dgoals
+           << setw(5) << tabla[i].points << endl;
+    }
+}
+
+// Guarda la tabla de posiciones en tabla.txt
+void exportarTabla(vector<Team> tabla) {
+
+    ofstream archivo("data/tabla.txt");
+    if (!archivo.is_open()) {
+        cout << "Error: no se pudo crear tabla.txt" << endl;
+        return;
+    }
+    
+    archivo << left << setw(4) << "#"
+         << setw(22) << "Equipo"
+         << right << setw(4) << "PJ"
+         << setw(4) << "PG"
+         << setw(4) << "PE"
+         << setw(4) << "PP"
+         << setw(4) << "GF"
+         << setw(4) << "GC"
+         << setw(4) << "DG"
+         << setw(5) << "PTS" << endl;
+
+    // imprimir cada equipo
+    for (int i = 0; i < tabla.size(); i++) {
+
+      archivo << left << setw(4) << i+1
+           << setw(22) << tabla[i].name
+           << right << setw(4) << tabla[i].tgames
+           << setw(4) << tabla[i].wgames
+           << setw(4) << tabla[i].dgames
+           << setw(4) << tabla[i].lgames
+           << setw(4) << tabla[i].sgoals
+           << setw(4) << tabla[i].agoals
+           << setw(4) << tabla[i].dgoals
+           << setw(5) << tabla[i].points << endl;
+    }
+    archivo.close();
+}
 
 int main() {
     ConfigLiga config = leerConfig("data/config.txt");
     vector<Game> partidos = leerPartidos();
     vector<Team> tabla = construirTabla(partidos, config);
     ordenarTabla(tabla);
-
-    for (int i = 0; i < tabla.size(); i++) {
-        cout << tabla[i].name << " - PTS:" << tabla[i].points
-             << " PJ:" << tabla[i].tgames
-             << " GF:" << tabla[i].sgoals << endl;
-    }
+    mostrarTabla(tabla);
+    exportarTabla(tabla);
     return 0;
 }
