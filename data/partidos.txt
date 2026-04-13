@@ -1,0 +1,6 @@
+2024-01-15|Real Madrid|Barcelona|2|1
+2024-01-15|Atletico de Madrid|Sevilla FC|1|1
+2024-01-16|Barcelona|Sevilla FC|3|0
+2024-01-16|Real Madrid|Atletico de Madrid|0|1
+2025-04-21|Real Madrid|Barcelona|12|10
+2025-04-20|Real Madrid|Sevilla FC|1|20
